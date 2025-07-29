@@ -1,23 +1,22 @@
-import { AfterViewInit, Component, OnInit, signal } from '@angular/core';
-import { Complex } from './complex';
-import { Color } from './color';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { Complex } from '../util/complex';
+import { Color } from '../util/color';
+import { Paint } from '../util/paint';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  selector: 'app-newton',
+  imports: [],
+  templateUrl: './newton.html',
+  styleUrl: './newton.css'
 })
-export class App implements OnInit, AfterViewInit {
-  protected readonly title = signal('newton');
-  canvas: HTMLCanvasElement | null = null;
-  ctx: CanvasRenderingContext2D | null = null;
-  imageData: ImageData | null = null;
+export class Newton implements OnInit, AfterViewInit{
+  paint: Paint | null = null;
   
-  readonly pixelWidth = 600;
-  readonly pixelHeight = 600;
+  readonly pixelWidth = 1500;
+  readonly pixelHeight = 1500;
   readonly complexWidth = 4;
   readonly complexHeight = 4;
-  readonly maxIterations = 200;
+  readonly maxIterations = 300;
   readonly tolerance = 1e-6;
 
   // 解析的な解
@@ -35,39 +34,28 @@ export class App implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.canvas = document.getElementById('myCanvas') as HTMLCanvasElement;
-    this.canvas.width = this.pixelWidth;
-    this.canvas.height = this.pixelHeight;
-    this.ctx = this.canvas.getContext('2d');
-    
-    if (!this.ctx) {
-      console.error('Failed to get canvas context');
-      return;
-    }
-    this.imageData = this.ctx.createImageData(this.pixelWidth, this.pixelHeight);
+    const canvas = document.getElementById('myCanvas') as HTMLCanvasElement;    
+    this.paint = new Paint(this.pixelWidth, this.pixelHeight, this.complexWidth, this.complexHeight, canvas);
   }
   
 
   draw() {
-    if (!this.ctx) {
-      console.error('Canvas context is not available');
-      return;
-    }
-    if (!this.imageData) {
-      console.error('Image data is not available');
+    if (!this.paint) {
+      console.error('Paint object is not initialized');
       return;
     }
 
     for (let y = 0; y < this.pixelHeight; y++) {
       for (let x = 0; x < this.pixelWidth; x++) {
-        const root = this.newton(this.pixelToComplex(x, y));
+        const complexPoint = this.paint.pixelToComplex(x, y);
+        const root = this.newton(complexPoint);
         const color = this.decideColor(root);
-        this.dot(x, y, color);
+        this.paint.dot(x, y, color);
       }
     }
 
     // Update the canvas with the image data
-    this.ctx!.putImageData(this.imageData!, 0, 0);
+    this.paint.updateCanvas();
   }
 
   newton(z: Complex): Complex {
@@ -128,20 +116,6 @@ export class App implements OnInit, AfterViewInit {
   }
     
   /**
-   * Draw a pixel at (x, y) with the specified color.
-   * @param x - The x-coordinate of the pixel.
-   * @param y - The y-coordinate of the pixel.
-   * @param color - The color to draw the pixel with.
-   */
-  dot(x: number, y: number, color: Color) {
-    const base = (y * this.pixelWidth + x) * 4;
-    this.imageData!.data[base] = color.red;
-    this.imageData!.data[base + 1] = color.green;
-    this.imageData!.data[base + 2] = color.blue;
-    this.imageData!.data[base + 3] = color.alpha;
-  }
-
-  /**
    * z^3 - 1
    * @param z 
    * @returns 
@@ -157,17 +131,5 @@ export class App implements OnInit, AfterViewInit {
    */
   df(z: Complex): Complex {
     return z.power(2).multiply(new Complex(3, 0));
-  }
-
-  /**
-   * Convert pixel coordinates to complex plane coordinates.
-   * @param x 
-   * @param y 
-   * @returns 
-   */
-  pixelToComplex(x: number, y: number): Complex {
-    const re = (x - this.pixelWidth / 2) / (this.pixelWidth) * this.complexWidth;
-    const im = (this.pixelHeight / 2 - y) / (this.pixelHeight) * this.complexHeight;
-    return new Complex(re, im);
   }
 }
