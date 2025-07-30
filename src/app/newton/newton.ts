@@ -10,6 +10,7 @@ import { Paint } from '../util/paint';
   styleUrl: './newton.css'
 })
 export class Newton implements OnInit, AfterViewInit{
+
   paint: Paint | null = null;
   
   readonly pixelWidth = 1500;
@@ -35,7 +36,7 @@ export class Newton implements OnInit, AfterViewInit{
 
   ngAfterViewInit(): void {
     const canvas = document.getElementById('myCanvas') as HTMLCanvasElement;    
-    this.paint = new Paint(this.pixelWidth, this.pixelHeight, this.complexWidth, this.complexHeight, canvas);
+    this.paint = new Paint(canvas, this.pixelWidth, this.pixelHeight, this.complexWidth, this.complexHeight);
   }
   
 

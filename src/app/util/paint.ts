@@ -7,11 +7,11 @@ export class Paint {
   imageData: ImageData | null = null;
 
   constructor (
+    public canvas: HTMLCanvasElement,
     public pixelWidth: number,
     public pixelHeight: number,
-    public complexWidth: number,
-    public complexHeight: number,
-    public canvas: HTMLCanvasElement,
+    public complexWidth: number = 4,
+    public complexHeight: number = 4,
   ) {
     this.canvas.width = this.pixelWidth;
     this.canvas.height = this.pixelHeight;
@@ -57,5 +57,9 @@ export class Paint {
       return;
     }
     this.ctx.putImageData(this.imageData, 0, 0);
+  }
+
+  getContext(): CanvasRenderingContext2D | null {
+    return this.ctx;
   }
 }

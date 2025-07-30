@@ -30,7 +30,7 @@ export class Mandelbrot implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     const canvas = document.getElementById('myCanvas') as HTMLCanvasElement;    
-    this.paint = new Paint(this.pixelWidth, this.pixelHeight, this.complexWidth, this.complexHeight, canvas);
+    this.paint = new Paint(canvas, this.pixelWidth, this.pixelHeight, this.complexWidth, this.complexHeight);
   }
 
   draw() {
